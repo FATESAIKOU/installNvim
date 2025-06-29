@@ -1,6 +1,6 @@
-# nvim enviroment setup guideline
+# Neovim Environment Setup Guide
 
-## Process to install/configure nvim on macOS
+## Process to install/configure Neovim on macOS
 
 ### Install lazy.nvim
 ```
@@ -13,7 +13,7 @@ $ mkdir ~/.config/nvim
 $ cp ./init.vim ~/.config/nvim/init.vim
 ```
 
-### Open & Inialize lazy.nvim
+### Open & Initialize lazy.nvim
 ```
 $ nvim foo.txt
 # and execute ":Lazy update" in the editor
@@ -30,7 +30,7 @@ $ nvim foo.md
 # execute ":call mkdp#util#install()" in the editor
 ```
 
-## Usage and shortcuts of nvim
+## Usage and shortcuts for Neovim
 
 | Function | Key |
 |-------------------------------|------------------|
@@ -57,110 +57,143 @@ $ nvim foo.md
 
 ---
 
-## ✅ Next Steps: Language-specific Setup
+## ✅ LSP Configuration Summary (Completed)
 
-Below are the clear next steps for building a **full development + test + debug** environment for each stack.
+We have completed LSP configuration for three main languages, supporting **Node.js/TypeScript**, **Python**, and **Java (Spring Boot)** development.
+
+### 🔧 Configured LSP Features
+
+**Auto-installed LSP Servers:**
+- `ts_ls` - TypeScript/JavaScript support
+- `pyright` - Python support  
+- `jdtls` - Java support
+
+**LSP Keybindings:**
+| Function | Keybinding | Description |
+|----------|------------|-------------|
+| Go to definition | `gd` | Jump to function/variable definition |
+| Show documentation | `K` | Display hover documentation |
+| Rename symbol | `<space>rn` | Smart rename variable/function |
+| Code actions | `<space>ca` | Quick fixes, refactoring suggestions |
+| Find references | `gr` | Find all reference locations |
+
+**Auto-completion Features:**
+- LSP-based intelligent completion
+- Snippet expansion support
+- Tab/Ctrl+n/p navigation for completion options
+- Enter to confirm selection
+
+### 📁 Project Setup Requirements
+
+Ensure your project has appropriate root marker files:
+
+**Node.js/TypeScript Projects:**
+```bash
+# Create package.json to activate TypeScript LSP
+npm init -y
+```
+
+**Python Projects:**
+```bash
+# pyright auto-detects Python files, no special setup required
+```
+
+**Java Projects:**
+```bash
+# Create Maven or Gradle project structure
+# jdtls auto-detects pom.xml or build.gradle
+```
+
+### 🚀 How to Use
+
+1. Open any `.js/.ts/.py/.java` file
+2. LSP will automatically start and provide intelligent completion
+3. Use the keybindings above for code navigation and operations
+4. Completion suggestions will appear automatically as you type
 
 ---
 
-### 1️⃣ **Node.js (Express)**
+## ✅ Next Steps: Testing and Debugging Environment
 
-**Goal:**  
-- LSP auto-completion  
+LSP and auto-completion are complete! The next goal is to establish comprehensive **testing** and **debugging** environments for each language.
+
+---
+
+### 1️⃣ **Node.js Testing and Debugging**
+
+**Remaining Goals:**  
 - ESLint / Prettier integration (optional)  
-- Unit test runner (e.g. Jest)  
+- Unit test runner (Jest/Mocha)  
 - Debugging (DAP)
 
-**Steps:**  
-1. Open `:Mason` and install:
-   - `tsserver` (for JavaScript/TypeScript)
-   - `eslint` (optional, if you want inline linting)
-
-2. Add to `init.vim`:
-   ```lua
-   require('lspconfig').tsserver.setup{}
+**Suggested Steps:**  
+1. Install ESLint/Prettier in project:
+   ```bash
+   npm install --save-dev eslint prettier
    ```
 
-3. For debugging:
+2. Install testing and debugging plugins:
+   ```lua
+   -- Add to lazy.nvim setup
+   {"mfussenegger/nvim-dap"},
+   {"rcarriga/nvim-dap-ui"},
+   {"nvim-neotest/neotest"},
+   ```
 
-   * Install `mfussenegger/nvim-dap`
-   * Add `nvim-dap` config for Node.js (e.g. `vscode-node-debug2`)
-
-4. Write unit tests (Jest) in your project, then run them in a split terminal or using `vim-test` plugin if you prefer.
+3. Configure Node.js debugger
 
 ---
 
-### 2️⃣ **Python**
+### 2️⃣ **Python Testing and Debugging**
 
-**Goal:**
+**Remaining Goals:**
+- Black / Pylint integration (optional)
+- Unit test runner (pytest)
+- Debugging (DAP)
 
-* LSP auto-completion
-* Black / Pylint integration (optional)
-* Unit test runner (pytest)
-* Debugging (DAP)
+**Suggested Steps:**
 
-**Steps:**
-
-1. Open `:Mason` and install:
-
-   * `pyright` (Python LSP)
-
-2. Add to `init.vim`:
-
-   ```lua
-   require('lspconfig').pyright.setup{}
+1. Install development tools:
+   ```bash
+   pip install black pylint pytest
    ```
 
-3. For debugging:
+2. Configure Python debugger:
+   ```bash
+   pip install debugpy
+   ```
 
-   * Install `mfussenegger/nvim-dap`
-   * Install `debugpy` in your Python env:
-
-     ```bash
-     pip install debugpy
-     ```
-
-4. Write `pytest` tests and run them in a terminal or integrate `vim-test`.
+3. Add DAP configuration
 
 ---
 
-### 3️⃣ **Java (Spring Boot)**
+### 3️⃣ **Java Testing and Debugging**
 
-**Goal:**
+**Remaining Goals:**
+- Maven/Gradle integration
+- Unit test runner (JUnit)
+- Debugging (DAP)
 
-* LSP auto-completion
-* Maven/Gradle support (managed outside Neovim)
-* Unit test runner (JUnit)
-* Debugging (DAP)
+**Suggested Steps:**
 
-**Steps:**
+1. Ensure project has `pom.xml` or `build.gradle`
 
-1. Open `:Mason` and install:
+2. Install Java debug adapter via Mason
 
-   * `jdtls` (Java LSP)
-
-2. Add to `init.vim`:
-
-   ```lua
-   require('lspconfig').jdtls.setup{}
-   ```
-
-3. For debugging:
-
-   * Install `mfussenegger/nvim-dap`
-   * Setup Java debug adapter (`vscode-java-debug`)
-
-4. Run Maven/Gradle tests from terminal or via external tooling.
+3. Configure Spring Boot debugging environment
 
 ---
 
-## 🔗 Optional Recommended Plugins for Debugging (DAP)
+## 🔗 Recommended Testing and Debugging Plugins
 
 ```lua
+-- Testing and debugging related plugins
 {
-  "mfussenegger/nvim-dap",
-  "rcarriga/nvim-dap-ui",
-  "williamboman/mason-nvim-dap.nvim",
+  "mfussenegger/nvim-dap",           -- Core debug adapter
+  "rcarriga/nvim-dap-ui",            -- Debug UI
+  "williamboman/mason-nvim-dap.nvim", -- Mason DAP integration
+  "nvim-neotest/neotest",            -- Test runner
+  "vim-test/vim-test",               -- Alternative test runner
 }
 ```
 

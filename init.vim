@@ -49,6 +49,7 @@ require("lazy").setup({
   {"hrsh7th/nvim-cmp"},
   {"saadparwaiz1/cmp_luasnip"},
   {"hrsh7th/cmp-nvim-lsp"},
+  {"hrsh7th/cmp-buffer"},
 
   -- UI
   {"nvim-lualine/lualine.nvim"},
@@ -110,6 +111,67 @@ EOF
 " NvimTree 啟動
 lua << EOF
 require("nvim-tree").setup()
+EOF
+
+" ---------------------------
+" Mason & LSP 設定
+" ---------------------------
+lua << EOF
+-- Mason 初始化與 LSP 自動安裝
+require("mason").setup()
+require("mason-lspconfig").setup({
+    ensure_installed = { "ts_ls", "pyright", "jdtls" },
+    automatic_installation = true,
+})
+
+-- LSP 設定
+local lspconfig = require('lspconfig')
+local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+-- LSP 快捷鍵
+local function on_attach(client, bufnr)
+    local opts = { noremap=true, silent=true, buffer=bufnr }
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
+end
+
+-- 啟動三個主要 LSP
+lspconfig.ts_ls.setup { capabilities = capabilities, on_attach = on_attach }
+lspconfig.pyright.setup { capabilities = capabilities, on_attach = on_attach }
+lspconfig.jdtls.setup { capabilities = capabilities, on_attach = on_attach }
+EOF
+
+" ---------------------------
+" nvim-cmp 自動補全設定
+" ---------------------------
+lua << EOF
+local cmp = require('cmp')
+local luasnip = require('luasnip')
+
+cmp.setup({
+    snippet = {
+        expand = function(args) luasnip.lsp_expand(args.body) end,
+    },
+    mapping = cmp.mapping.preset.insert({
+        ['<C-n>'] = cmp.mapping.select_next_item(),
+        ['<C-p>'] = cmp.mapping.select_prev_item(),
+        ['<CR>'] = cmp.mapping.confirm({ select = true }),
+        ['<Tab>'] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_next_item()
+            else
+                fallback()
+            end
+        end, { 'i', 's' }),
+    }),
+    sources = {
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' },
+    },
+})
 EOF
 
 " ---------------------------
