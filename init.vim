@@ -116,71 +116,32 @@ EOF
 " ---------------------------
 " Mason & LSP 設定
 " ---------------------------
-" Mason 初始化
 lua << EOF
-require("mason").setup({
-    ui = {
-        icons = {
-            package_installed = "✓",
-            package_pending = "➜",
-            package_uninstalled = "✗"
-        }
-    }
-})
-EOF
-
-" Mason-lspconfig 設定與自動啟動
-lua << EOF
+-- Mason 初始化與 LSP 自動安裝
+require("mason").setup()
 require("mason-lspconfig").setup({
-    ensure_installed = {
-        "ts_ls",
-        "pyright", 
-        "jdtls"
-    },
+    ensure_installed = { "ts_ls", "pyright", "jdtls" },
     automatic_installation = true,
 })
 
--- 自動設定所有 LSP 伺服器
+-- LSP 設定
 local lspconfig = require('lspconfig')
 local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
--- 通用的 on_attach 函數
+-- LSP 快捷鍵
 local function on_attach(client, bufnr)
-    local bufopts = { noremap=true, silent=true, buffer=bufnr }
-    vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-    vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
-    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-    vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+    local opts = { noremap=true, silent=true, buffer=bufnr }
+    vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
+    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, opts)
+    vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, opts)
+    vim.keymap.set('n', 'gr', vim.lsp.buf.references, opts)
 end
 
--- 為所有已安裝的 LSP 使用相同配置
-for _, server in ipairs(require('mason-lspconfig').get_installed_servers()) do
-    lspconfig[server].setup {
-        capabilities = capabilities,
-        on_attach = on_attach,
-    }
-end
-
--- TypeScript 特殊配置 (覆蓋默認設定)
-lspconfig.ts_ls.setup({
-    capabilities = capabilities,
-    on_attach = on_attach,
-    settings = {
-        typescript = {
-            inlayHints = {
-                includeInlayParameterNameHints = 'all',
-            }
-        },
-        javascript = {
-            inlayHints = {
-                includeInlayParameterNameHints = 'all',
-            }
-        }
-    },
-})
+-- 啟動三個主要 LSP
+lspconfig.ts_ls.setup { capabilities = capabilities, on_attach = on_attach }
+lspconfig.pyright.setup { capabilities = capabilities, on_attach = on_attach }
+lspconfig.jdtls.setup { capabilities = capabilities, on_attach = on_attach }
 EOF
 
 " ---------------------------
@@ -192,52 +153,23 @@ local luasnip = require('luasnip')
 
 cmp.setup({
     snippet = {
-        expand = function(args)
-            luasnip.lsp_expand(args.body)
-        end,
-    },
-    completion = {
-        autocomplete = { 
-            require('cmp.types').cmp.TriggerEvent.TextChanged,
-            require('cmp.types').cmp.TriggerEvent.InsertEnter,
-        },
-        completeopt = 'menu,menuone,noselect',
+        expand = function(args) luasnip.lsp_expand(args.body) end,
     },
     mapping = cmp.mapping.preset.insert({
-        ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-        ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-n>'] = cmp.mapping.select_next_item(),
         ['<C-p>'] = cmp.mapping.select_prev_item(),
-        ['<C-y>'] = cmp.mapping.complete(),
-        ['<C-e>'] = cmp.mapping.abort(),
         ['<CR>'] = cmp.mapping.confirm({ select = true }),
         ['<Tab>'] = cmp.mapping(function(fallback)
             if cmp.visible() then
                 cmp.select_next_item()
-            elseif luasnip.expand_or_jumpable() then
-                luasnip.expand_or_jump()
-            else
-                fallback()
-            end
-        end, { 'i', 's' }),
-        ['<S-Tab>'] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-                cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-                luasnip.jump(-1)
             else
                 fallback()
             end
         end, { 'i', 's' }),
     }),
-    sources = cmp.config.sources({
-        { name = 'nvim_lsp', priority = 1000 },
-        { name = 'luasnip', priority = 750 },
-    }, {
-        { name = 'buffer', priority = 500 },
-    }),
-    experimental = {
-        ghost_text = true,
+    sources = {
+        { name = 'nvim_lsp' },
+        { name = 'luasnip' },
     },
 })
 EOF
