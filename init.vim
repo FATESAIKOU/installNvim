@@ -65,7 +65,13 @@ require("lazy").setup({
   {"mbbill/undotree"},
 
   -- Markdown Preview
-  {"iamcco/markdown-preview.nvim", build = "cd app && npm install", ft = {"markdown"}}
+  {"iamcco/markdown-preview.nvim", build = "cd app && npm install", ft = {"markdown"}},
+
+  -- Github Copilot
+  {
+    "github/copilot.vim",
+    lazy=false,
+  },
 })
 
 vim.cmd[[colorscheme github_dark]]
