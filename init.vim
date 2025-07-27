@@ -218,3 +218,13 @@ nnoremap <Leader>f :Telescope find_files<CR>
 
 " Telescope 內容全文搜尋 (live grep)
 nnoremap <Leader>g :Telescope live_grep<CR>
+
+" 顯示 LSP 浮窗錯誤訊息
+lua << EOF
+vim.o.updatetime = 300
+vim.cmd [[
+  autocmd CursorHold * lua vim.diagnostic.open_float(nil, { focusable = false })
+]]
+EOF
+
+
